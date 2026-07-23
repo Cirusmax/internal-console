@@ -24,7 +24,14 @@
   font-weight: 700;
   font-size: 1.02rem;
 }
-.sidebar__brand img { width: 32px; height: 32px; object-fit: contain; border-radius: 8px; }
+.sidebar__brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 8px;
+  /* logo é azul-escuro sólido; filtro converte pra branco sobre o fundo escuro da sidebar */
+  filter: brightness(0) invert(1);
+}
 .sidebar__nav { display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .sidebar__nav a {
   display: flex;
