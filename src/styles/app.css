@@ -165,6 +165,7 @@
 }
 .badge--receita { background: var(--periwinkle-light); color: var(--navy); }
 .badge--despesa { background: var(--red-light); color: var(--red); }
+.badge--recorrente { background: var(--sand); color: var(--text-soft); font-weight: 600; }
 
 .amount--receita { color: var(--green-dark); font-weight: 700; }
 .amount--despesa { color: var(--red); font-weight: 700; }

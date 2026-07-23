@@ -10,6 +10,7 @@ Painel interno de controle financeiro (receitas, despesas e indicadores), com au
    - **Project URL**
    - **anon / publishable key**
 4. Em **Authentication > Sign In / Providers**, desative **Confirm email** (uso interno, sem necessidade de confirmação por email).
+5. Ainda no **SQL Editor**, rode também [`supabase/migration_002_shared_recurring_audit.sql`](supabase/migration_002_shared_recurring_audit.sql) — deixa os lançamentos compartilhados entre todos os usuários logados (em vez de privados por conta), cria o log de atividade e os lançamentos recorrentes.
 
 ## 2. Configurar o projeto localmente
 
@@ -30,11 +31,20 @@ Acesse a URL que o Vite mostrar (geralmente `http://localhost:5173`). Na primeir
 
 ## Estrutura
 
-- `src/pages` — telas (Login, Dashboard, Lançamentos)
-- `src/components` — componentes reutilizáveis (cards, tabela, modal, gráficos)
+- `src/pages` — telas (Login, Dashboard, Lançamentos, Recorrentes, Atividade)
+- `src/components` — componentes reutilizáveis (cards, tabela, modais, gráficos)
 - `src/styles/tokens.css` — variáveis de design (cores, fonte, sombras, radius)
 - `src/styles/app.css` — layout do sistema (sidebar, tabelas, formulários)
 - `supabase/schema.sql` — definição da tabela `transactions` e políticas de segurança (RLS)
+- `supabase/migration_002_shared_recurring_audit.sql` — livro-caixa compartilhado, log de atividade (`activity_log`) e regras recorrentes (`recurring_rules`)
+
+## Lançamentos recorrentes
+
+Cadastrados em **Recorrentes** (valor, categoria, dia do mês). Não existe servidor rodando 24h, então a geração acontece no navegador: quando qualquer usuário logado abre o app e ainda não existe o lançamento do mês pra uma regra ativa, ele é criado na hora. Um índice único no banco impede duplicar caso dois usuários abram o app ao mesmo tempo.
+
+## Atividade e exclusões
+
+Toda criação/edição/exclusão de lançamento é registrada automaticamente (por trigger no banco, não dá pra burlar pelo app) e fica visível em **Atividade**. Ao excluir um lançamento criado por outra pessoa, aparece um aviso identificando quem criou antes de confirmar.
 
 ## Deploy (GitHub Pages)
 

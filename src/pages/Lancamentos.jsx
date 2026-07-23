@@ -3,6 +3,7 @@ import { useTransactions } from "../lib/useTransactions";
 import { useAuth } from "../contexts/AuthContext";
 import { TransactionsTable } from "../components/TransactionsTable";
 import { TransactionModal } from "../components/TransactionModal";
+import { ConfirmDeleteModal } from "../components/ConfirmDeleteModal";
 
 function monthKey(dateStr) {
   return dateStr.slice(0, 7);
@@ -14,6 +15,7 @@ export function Lancamentos() {
   const [typeFilter, setTypeFilter] = useState("todos");
   const [monthFilter, setMonthFilter] = useState(new Date().toISOString().slice(0, 7));
   const [modalState, setModalState] = useState(null); // null | { mode: 'new' } | { mode: 'edit', transaction }
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
@@ -27,14 +29,13 @@ export function Lancamentos() {
     if (modalState?.mode === "edit") {
       await updateTransaction(modalState.transaction.id, payload);
     } else {
-      await addTransaction({ ...payload, user_id: user.id });
+      await addTransaction(payload);
     }
   };
 
-  const handleDelete = async (transaction) => {
-    if (window.confirm("Excluir este lançamento?")) {
-      await deleteTransaction(transaction.id);
-    }
+  const handleConfirmDelete = async () => {
+    await deleteTransaction(pendingDelete.id);
+    setPendingDelete(null);
   };
 
   return (
@@ -66,7 +67,7 @@ export function Lancamentos() {
         <TransactionsTable
           transactions={filtered}
           onEdit={(t) => setModalState({ mode: "edit", transaction: t })}
-          onDelete={handleDelete}
+          onDelete={(t) => setPendingDelete(t)}
         />
       )}
 
@@ -75,6 +76,15 @@ export function Lancamentos() {
           initial={modalState.mode === "edit" ? modalState.transaction : null}
           onSave={handleSave}
           onClose={() => setModalState(null)}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmDeleteModal
+          transaction={pendingDelete}
+          isOwnEntry={pendingDelete.user_id === user.id}
+          onConfirm={handleConfirmDelete}
+          onClose={() => setPendingDelete(null)}
         />
       )}
     </>

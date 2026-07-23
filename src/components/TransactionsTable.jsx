@@ -15,6 +15,7 @@ export function TransactionsTable({ transactions, onEdit, onDelete }) {
           <th>Categoria</th>
           <th>Descrição</th>
           <th>Valor</th>
+          <th>Criado por</th>
           <th></th>
         </tr>
       </thead>
@@ -25,12 +26,20 @@ export function TransactionsTable({ transactions, onEdit, onDelete }) {
             <td>
               <span className={`badge badge--${t.type}`}>{t.type === "receita" ? "Receita" : "Despesa"}</span>
             </td>
-            <td>{t.category}</td>
+            <td>
+              {t.category}
+              {t.recurring_rule_id && (
+                <span className="badge badge--recorrente" style={{ marginLeft: 8 }}>
+                  Recorrente
+                </span>
+              )}
+            </td>
             <td>{t.description || "—"}</td>
             <td className={`amount--${t.type}`}>
               {t.type === "despesa" ? "-" : "+"}
               {currencyFormatter.format(t.amount)}
             </td>
+            <td title={t.created_by_email || ""}>{(t.created_by_email || "—").split("@")[0]}</td>
             <td>
               <div className="row-actions">
                 <button className="icon-btn" aria-label="Editar" onClick={() => onEdit(t)}>

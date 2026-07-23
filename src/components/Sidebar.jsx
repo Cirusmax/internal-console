@@ -19,6 +19,12 @@ export function Sidebar() {
         <NavLink to="/lancamentos" className={({ isActive }) => (isActive ? "active" : "")}>
           Lançamentos
         </NavLink>
+        <NavLink to="/recorrentes" className={({ isActive }) => (isActive ? "active" : "")}>
+          Recorrentes
+        </NavLink>
+        <NavLink to="/atividade" className={({ isActive }) => (isActive ? "active" : "")}>
+          Atividade
+        </NavLink>
       </nav>
 
       <div className="sidebar__footer">
