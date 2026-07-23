@@ -1,0 +1,137 @@
+/* ===== Tokens (copiados/adaptados da landing page Almeida Advocacia) ===== */
+:root {
+  --navy: #1c2b41;
+  --navy-2: #131e2f;
+  --ink: #1c2b41;
+  --periwinkle: #788abd;
+  --periwinkle-light: #e7eaf5;
+  --sand: #eceeee;
+  --paper: #f4f4f4;
+  --white: #ffffff;
+  --green: #26c281;
+  --green-dark: #10c379;
+  --red: #e05d5d;
+  --red-light: #fbe9e9;
+  --text: #1c2b41;
+  --text-soft: #5b6472;
+  --text-on-dark: #dfe3f5;
+  --border: #e2e2e0;
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --shadow-soft: 0 20px 50px -25px rgba(16, 24, 44, 0.35);
+  --shadow-card: 0 10px 30px -12px rgba(16, 24, 44, 0.18);
+  --font-display: "Questrial", sans-serif;
+  --font-body: "Questrial", sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0 0 0.4em;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+p { line-height: 1.6; color: var(--text-soft); margin: 0 0 1em; }
+
+.eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--periwinkle);
+  margin: 0 0 0.6em;
+}
+
+/* ===== Buttons (idênticos à landing) ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+  white-space: nowrap;
+  font-family: var(--font-body);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn--primary {
+  background: var(--ink);
+  color: var(--white);
+  box-shadow: var(--shadow-card);
+}
+.btn--primary:hover { background: var(--navy-2); box-shadow: var(--shadow-soft); }
+.btn--ghost {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--border);
+}
+.btn--ghost:hover { border-color: var(--periwinkle); }
+.btn--danger {
+  background: var(--red-light);
+  color: var(--red);
+}
+.btn--danger:hover { background: var(--red); color: var(--white); }
+.btn--sm { padding: 9px 18px; font-size: 0.82rem; }
+.btn--block { width: 100%; padding: 15px; }
+
+/* ===== Form fields (mesmo estilo do formulário de contato) ===== */
+.form-field { margin-bottom: 16px; }
+.form-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: var(--sand);
+  transition: border-color 0.2s, background 0.2s;
+  resize: vertical;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--periwinkle);
+  background: var(--white);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ===== Cards ===== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
