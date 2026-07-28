@@ -48,8 +48,10 @@ create trigger trg_recurring_rules_authorship
   for each row execute function public.set_recurring_rule_authorship();
 
 -- Evita gerar o lançamento do mesmo mês duas vezes pra uma mesma regra recorrente
+-- (cast pra "timestamp sem fuso" pra usar a variante IMMUTABLE do date_trunc,
+-- que é o que um índice exige; a variante com timestamptz é STABLE e não serve)
 create unique index if not exists transactions_recurring_month_unique
-  on public.transactions (recurring_rule_id, date_trunc('month', occurred_on))
+  on public.transactions (recurring_rule_id, date_trunc('month', occurred_on::timestamp))
   where recurring_rule_id is not null;
 
 -- Autoria automática e autêntica (o cliente não escolhe quem é o autor, o banco decide)
