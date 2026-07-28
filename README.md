@@ -53,6 +53,14 @@ Toda criação/edição/exclusão de lançamento é registrada automaticamente (
 
 Em **Clientes**, cadastre o cliente e depois uma "cobrança" (valor total + nº de parcelas + vencimento da 1ª parcela) — o sistema gera as parcelas mensais sozinho. Elas ficam como "pendente" (ou "vencida", se passar do prazo) e **não contam no saldo/dashboard** até serem confirmadas. Ao clicar "Marcar como pago", a parcela vira um lançamento de receita de verdade (com toda a autoria/auditoria de sempre); "Desfazer" reverte isso.
 
+## Relatório em PDF
+
+Em **Lançamentos**, o botão "Exportar PDF" gera um relatório do período filtrado (mês + tipo selecionados na tela): tabela das movimentações, totais de receita/despesa/saldo, e uma conclusão em texto (saldo do período, maior categoria de despesa etc.) calculada a partir dos próprios dados.
+
+## Backup (exportar/importar JSON)
+
+Em **Backup**: "Baixar backup" exporta todas as tabelas (clientes, cobranças, parcelas, recorrentes, lançamentos e o log de atividade) num único arquivo `.json`. "Importar" lê esse arquivo e restaura os dados via *upsert* — registros com o mesmo ID são atualizados, os demais são criados; nada é apagado automaticamente. O log de Atividade é exportado só como referência (não é reimportável, é só um histórico). Lançamentos restaurados por importação aparecem com a autoria de quem importou, não a autoria original.
+
 ## Deploy (GitHub Pages)
 
 O workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builda e publica automaticamente no GitHub Pages a cada push na branch `main`.

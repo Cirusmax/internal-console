@@ -300,6 +300,10 @@
   font-size: 0.88rem;
   margin-bottom: 16px;
 }
+.form-error--ok {
+  background: var(--periwinkle-light);
+  color: var(--navy);
+}
 
 /* ===== Login ===== */
 .login-screen {

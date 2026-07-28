@@ -4,9 +4,23 @@ import { useAuth } from "../contexts/AuthContext";
 import { TransactionsTable } from "../components/TransactionsTable";
 import { TransactionModal } from "../components/TransactionModal";
 import { ConfirmDeleteModal } from "../components/ConfirmDeleteModal";
+import { generateMovementsReportPdf } from "../lib/generateReportPdf";
+
+const monthLabelFormatter = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" });
 
 function monthKey(dateStr) {
   return dateStr.slice(0, 7);
+}
+
+function formatPeriodLabel(monthFilter, typeFilter) {
+  let label = "Todos os lançamentos";
+  if (monthFilter) {
+    const [year, month] = monthFilter.split("-").map(Number);
+    label = monthLabelFormatter.format(new Date(year, month - 1, 1));
+  }
+  if (typeFilter === "receita") label += " — apenas receitas";
+  else if (typeFilter === "despesa") label += " — apenas despesas";
+  return label;
 }
 
 export function Lancamentos() {
@@ -38,6 +52,13 @@ export function Lancamentos() {
     setPendingDelete(null);
   };
 
+  const handleExportPdf = () => {
+    generateMovementsReportPdf({
+      transactions: filtered,
+      periodLabel: formatPeriodLabel(monthFilter, typeFilter),
+    });
+  };
+
   return (
     <>
       <div className="topbar">
@@ -45,9 +66,14 @@ export function Lancamentos() {
           <h1>Lançamentos</h1>
           <p>Receitas e despesas do escritório.</p>
         </div>
-        <button className="btn btn--primary" onClick={() => setModalState({ mode: "new" })}>
-          + Novo lançamento
-        </button>
+        <div style={{ display: "flex", gap: 12 }}>
+          <button className="btn btn--ghost" onClick={handleExportPdf} disabled={filtered.length === 0}>
+            Exportar PDF
+          </button>
+          <button className="btn btn--primary" onClick={() => setModalState({ mode: "new" })}>
+            + Novo lançamento
+          </button>
+        </div>
       </div>
 
       {error && <div className="form-error">Erro ao carregar dados: {error}</div>}
