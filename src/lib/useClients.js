@@ -33,5 +33,11 @@ export function useClients() {
     return data;
   };
 
-  return { clients, loading, error, reload, addClient };
+  const deleteClient = async (id) => {
+    const { error: deleteError } = await supabase.from("clients").delete().eq("id", id);
+    if (deleteError) throw deleteError;
+    await reload();
+  };
+
+  return { clients, loading, error, reload, addClient, deleteClient };
 }

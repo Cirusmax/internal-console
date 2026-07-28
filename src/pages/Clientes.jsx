@@ -9,7 +9,7 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export function Clientes() {
-  const { clients, loading: clientsLoading, error: clientsError, addClient } = useClients();
+  const { clients, loading: clientsLoading, error: clientsError, addClient, deleteClient } = useClients();
   const {
     installments,
     loading: installmentsLoading,
@@ -61,6 +61,23 @@ export function Clientes() {
     setBusyId(chargeId);
     try {
       await deleteCharge(chargeId);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDeleteClient = async (e, clientId, clientName) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      !window.confirm(
+        `Excluir o cliente "${clientName}" e todas as cobranças/parcelas pendentes dele? Lançamentos de receita já confirmados não serão apagados.`
+      )
+    )
+      return;
+    setBusyId(clientId);
+    try {
+      await deleteClient(clientId);
     } finally {
       setBusyId(null);
     }
@@ -123,9 +140,23 @@ export function Clientes() {
             <details className="client-group" key={client.id} open={charges.length > 0}>
               <summary>
                 <span>{client.name}</span>
-                <span className="client-group__meta">
-                  {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
-                  {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
+                <span className="client-group__actions">
+                  <span className="client-group__meta">
+                    {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
+                    {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
+                  </span>
+                  <button
+                    className="icon-btn"
+                    aria-label="Excluir cliente"
+                    onClick={(e) => handleDeleteClient(e, client.id, client.name)}
+                    disabled={busyId === client.id}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    </svg>
+                  </button>
                 </span>
               </summary>
               <div className="client-group__body">
