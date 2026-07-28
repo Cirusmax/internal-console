@@ -12,7 +12,8 @@ Painel interno de controle financeiro (receitas, despesas e indicadores), com au
 4. Em **Authentication > Sign In / Providers**, desative **Confirm email** (uso interno, sem necessidade de confirmação por email).
 5. Ainda no **SQL Editor**, rode também [`supabase/migration_002_shared_recurring_audit.sql`](supabase/migration_002_shared_recurring_audit.sql) — deixa os lançamentos compartilhados entre todos os usuários logados (em vez de privados por conta), cria o log de atividade e os lançamentos recorrentes.
 6. Rode [`supabase/migration_003_clients_installments.sql`](supabase/migration_003_clients_installments.sql) — cria o cadastro de clientes e o controle de parcelamento de contratos.
-7. Por fim, rode [`supabase/migration_004_down_payment.sql`](supabase/migration_004_down_payment.sql) — adiciona suporte a "entrada" nas cobranças de cliente.
+7. Rode [`supabase/migration_004_down_payment.sql`](supabase/migration_004_down_payment.sql) — adiciona suporte a "entrada" nas cobranças de cliente.
+8. Por fim, rode [`supabase/migration_005_down_payment_label.sql`](supabase/migration_005_down_payment_label.sql) — ajusta o texto do lançamento gerado ao confirmar uma entrada.
 
 ## 2. Configurar o projeto localmente
 

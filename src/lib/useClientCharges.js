@@ -32,7 +32,8 @@ export function useClientCharges() {
     const { data, error: fetchError } = await supabase
       .from("client_installments")
       .select("*, charge:client_charges(*, client:clients(*))")
-      .order("due_date", { ascending: true });
+      .order("due_date", { ascending: true })
+      .order("installment_number", { ascending: true });
 
     if (fetchError) {
       setError(fetchError.message);
