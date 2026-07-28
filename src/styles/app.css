@@ -188,6 +188,66 @@
   color: var(--text-soft);
 }
 
+/* ===== Clientes (agrupado por cliente > cobrança > parcelas) ===== */
+.client-group {
+  margin-bottom: 16px;
+}
+.client-group summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.client-group summary::-webkit-details-marker { display: none; }
+.client-group[open] summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.client-group__meta {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.client-group__body {
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  padding: 20px;
+  background: var(--sand);
+}
+.charge-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.charge-card:last-child { margin-bottom: 0; }
+.charge-card .transactions-table { box-shadow: none; }
+.charge-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.charge-card__title { font-weight: 700; font-size: 0.98rem; }
+.charge-card__meta { font-size: 0.85rem; color: var(--text-soft); margin-top: 2px; }
+
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;

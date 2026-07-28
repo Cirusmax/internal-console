@@ -27,9 +27,10 @@ export function useClients() {
   }, [reload]);
 
   const addClient = async (payload) => {
-    const { error: insertError } = await supabase.from("clients").insert(payload);
+    const { data, error: insertError } = await supabase.from("clients").insert(payload).select().single();
     if (insertError) throw insertError;
     await reload();
+    return data;
   };
 
   return { clients, loading, error, reload, addClient };

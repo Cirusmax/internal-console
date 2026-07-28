@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
-function buildInstallments({ total_amount, installments_count, first_due_date }) {
-  const cents = Math.round(Number(total_amount) * 100);
+function buildInstallments({ amount_to_split, installments_count, first_due_date }) {
+  const cents = Math.round(Number(amount_to_split) * 100);
   const baseShare = Math.floor(cents / installments_count);
   const remainder = cents - baseShare * installments_count;
 
@@ -16,6 +16,7 @@ function buildInstallments({ total_amount, installments_count, first_due_date })
       installment_number: i + 1,
       amount: shareCents / 100,
       due_date: dueDate.toISOString().slice(0, 10),
+      is_down_payment: false,
     });
   }
   return installments;
@@ -47,6 +48,9 @@ export function useClientCharges() {
   }, [reload]);
 
   const addCharge = async (payload) => {
+    const downPayment = Number(payload.down_payment_amount) || 0;
+    const remainder = Number(payload.total_amount) - downPayment;
+
     const { data: charge, error: chargeError } = await supabase
       .from("client_charges")
       .insert({
@@ -61,10 +65,34 @@ export function useClientCharges() {
       .single();
     if (chargeError) throw chargeError;
 
-    const generated = buildInstallments(payload).map((i) => ({ ...i, charge_id: charge.id }));
-    const { error: installmentsError } = await supabase.from("client_installments").insert(generated);
+    const rows = [];
+    if (downPayment > 0) {
+      rows.push({
+        charge_id: charge.id,
+        installment_number: 0,
+        amount: downPayment,
+        due_date: payload.down_payment_date,
+        is_down_payment: true,
+      });
+    }
+    if (payload.installments_count > 0) {
+      const generated = buildInstallments({
+        amount_to_split: remainder,
+        installments_count: payload.installments_count,
+        first_due_date: payload.first_due_date,
+      });
+      rows.push(...generated.map((i) => ({ ...i, charge_id: charge.id })));
+    }
+
+    const { error: installmentsError } = await supabase.from("client_installments").insert(rows);
     if (installmentsError) throw installmentsError;
 
+    await reload();
+  };
+
+  const deleteCharge = async (chargeId) => {
+    const { error: deleteError } = await supabase.from("client_charges").delete().eq("id", chargeId);
+    if (deleteError) throw deleteError;
     await reload();
   };
 
@@ -84,5 +112,5 @@ export function useClientCharges() {
     await reload();
   };
 
-  return { installments, loading, error, reload, addCharge, markPaid, unmarkPaid };
+  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid };
 }
