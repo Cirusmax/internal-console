@@ -19,6 +19,9 @@ export function Sidebar() {
         <NavLink to="/lancamentos" className={({ isActive }) => (isActive ? "active" : "")}>
           Lançamentos
         </NavLink>
+        <NavLink to="/clientes" className={({ isActive }) => (isActive ? "active" : "")}>
+          Clientes
+        </NavLink>
         <NavLink to="/recorrentes" className={({ isActive }) => (isActive ? "active" : "")}>
           Recorrentes
         </NavLink>

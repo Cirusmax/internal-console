@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useTransactions } from "../lib/useTransactions";
+import { useClientCharges } from "../lib/useClientCharges";
 import { StatCard } from "../components/StatCard";
 import { MonthlyChart } from "../components/MonthlyChart";
 import { CategoryChart } from "../components/CategoryChart";
@@ -12,6 +13,12 @@ function monthKey(dateStr) {
 
 export function Dashboard() {
   const { transactions, loading, error } = useTransactions();
+  const { installments } = useClientCharges();
+
+  const aReceber = useMemo(
+    () => installments.filter((i) => !i.paid).reduce((sum, i) => sum + Number(i.amount), 0),
+    [installments]
+  );
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -85,6 +92,7 @@ export function Dashboard() {
             <StatCard label="Saldo atual" value={stats.saldo} tone={stats.saldo >= 0 ? "positive" : "negative"} />
             <StatCard label="Receitas no mês" value={stats.receitasMes} tone="positive" />
             <StatCard label="Despesas no mês" value={stats.despesasMes} tone="negative" />
+            <StatCard label="A receber (clientes)" value={aReceber} />
           </div>
 
           <div className="charts-grid">

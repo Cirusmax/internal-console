@@ -11,6 +11,7 @@ Painel interno de controle financeiro (receitas, despesas e indicadores), com au
    - **anon / publishable key**
 4. Em **Authentication > Sign In / Providers**, desative **Confirm email** (uso interno, sem necessidade de confirmação por email).
 5. Ainda no **SQL Editor**, rode também [`supabase/migration_002_shared_recurring_audit.sql`](supabase/migration_002_shared_recurring_audit.sql) — deixa os lançamentos compartilhados entre todos os usuários logados (em vez de privados por conta), cria o log de atividade e os lançamentos recorrentes.
+6. Por fim, rode [`supabase/migration_003_clients_installments.sql`](supabase/migration_003_clients_installments.sql) — cria o cadastro de clientes e o controle de parcelamento de contratos.
 
 ## 2. Configurar o projeto localmente
 
@@ -45,6 +46,10 @@ Cadastrados em **Recorrentes** (valor, categoria, dia do mês). Não existe serv
 ## Atividade e exclusões
 
 Toda criação/edição/exclusão de lançamento é registrada automaticamente (por trigger no banco, não dá pra burlar pelo app) e fica visível em **Atividade**. Ao excluir um lançamento criado por outra pessoa, aparece um aviso identificando quem criou antes de confirmar.
+
+## Clientes e parcelamento
+
+Em **Clientes**, cadastre o cliente e depois uma "cobrança" (valor total + nº de parcelas + vencimento da 1ª parcela) — o sistema gera as parcelas mensais sozinho. Elas ficam como "pendente" (ou "vencida", se passar do prazo) e **não contam no saldo/dashboard** até serem confirmadas. Ao clicar "Marcar como pago", a parcela vira um lançamento de receita de verdade (com toda a autoria/auditoria de sempre); "Desfazer" reverte isso.
 
 ## Deploy (GitHub Pages)
 

@@ -8,6 +8,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Lancamentos } from "./pages/Lancamentos";
 import { Recorrentes } from "./pages/Recorrentes";
 import { Atividade } from "./pages/Atividade";
+import { Clientes } from "./pages/Clientes";
 import { generateRecurringTransactions } from "./lib/generateRecurringTransactions";
 
 function AppLayout() {
@@ -44,6 +45,7 @@ export default function App() {
           >
             <Route path="/" element={<Dashboard />} />
             <Route path="/lancamentos" element={<Lancamentos />} />
+            <Route path="/clientes" element={<Clientes />} />
             <Route path="/recorrentes" element={<Recorrentes />} />
             <Route path="/atividade" element={<Atividade />} />
           </Route>
