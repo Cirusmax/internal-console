@@ -1,19 +1,34 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTransactions } from "../lib/useTransactions";
 import { useClientCharges } from "../lib/useClientCharges";
 import { StatCard } from "../components/StatCard";
 import { MonthlyChart } from "../components/MonthlyChart";
 import { CategoryChart } from "../components/CategoryChart";
+import { generateMovementsReportPdf } from "../lib/generateReportPdf";
 
 const MONTH_LABEL = new Intl.DateTimeFormat("pt-BR", { month: "short" });
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 function monthKey(dateStr) {
   return dateStr.slice(0, 7); // YYYY-MM
 }
 
+function firstDayOfMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function Dashboard() {
   const { transactions, loading, error } = useTransactions();
   const { installments } = useClientCharges();
+
+  const [startDate, setStartDate] = useState(firstDayOfMonth());
+  const [endDate, setEndDate] = useState(todayStr());
+  const [allTime, setAllTime] = useState(false);
 
   const aReceber = useMemo(
     () => installments.filter((i) => !i.paid).reduce((sum, i) => sum + Number(i.amount), 0),
@@ -75,6 +90,20 @@ export function Dashboard() {
     return Object.entries(totals).map(([name, value]) => ({ name, value }));
   }, [transactions]);
 
+  const reportTransactions = useMemo(() => {
+    if (allTime) return transactions;
+    return transactions.filter((t) => t.occurred_on >= startDate && t.occurred_on <= endDate);
+  }, [transactions, allTime, startDate, endDate]);
+
+  const handleExportPdf = () => {
+    const periodLabel = allTime
+      ? "Todo o período"
+      : `${dateFormatter.format(new Date(`${startDate}T00:00:00`))} a ${dateFormatter.format(
+          new Date(`${endDate}T00:00:00`)
+        )}`;
+    generateMovementsReportPdf({ transactions: reportTransactions, periodLabel });
+  };
+
   return (
     <>
       <div className="topbar">
@@ -85,6 +114,29 @@ export function Dashboard() {
       </div>
 
       {error && <div className="form-error">Erro ao carregar dados: {error}</div>}
+
+      <div className="chart-card" style={{ marginBottom: 32 }}>
+        <h3>Relatório de movimentações</h3>
+        <div className="table-toolbar" style={{ marginBottom: 0 }}>
+          <div className="table-filters">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              disabled={allTime}
+            />
+            <span style={{ alignSelf: "center", color: "var(--text-soft)" }}>até</span>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={allTime} />
+            <label className="checkbox">
+              <input type="checkbox" checked={allTime} onChange={(e) => setAllTime(e.target.checked)} />
+              <span>Todo o período</span>
+            </label>
+          </div>
+          <button className="btn btn--primary" onClick={handleExportPdf} disabled={reportTransactions.length === 0}>
+            Exportar PDF
+          </button>
+        </div>
+      </div>
 
       {!loading && (
         <>

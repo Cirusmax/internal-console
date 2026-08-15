@@ -55,7 +55,7 @@ Em **Clientes**, cadastre o cliente e depois uma "cobrança" (valor total + nº 
 
 ## Relatório em PDF
 
-Em **Lançamentos**, o botão "Exportar PDF" gera um relatório do período filtrado (mês + tipo selecionados na tela): tabela das movimentações, totais de receita/despesa/saldo, e uma conclusão em texto (saldo do período, maior categoria de despesa etc.) calculada a partir dos próprios dados.
+No **Dashboard**, em "Relatório de movimentações": escolha um intervalo de datas (ou marque "Todo o período" pra pegar tudo que já existe) e clique "Exportar PDF". Gera um relatório com a tabela de todas as entradas e saídas do período, totais de receita/despesa/saldo, e uma conclusão em texto (saldo do período, maior categoria de despesa etc.) calculada a partir dos próprios dados.
 
 ## Backup (exportar/importar JSON)
 
