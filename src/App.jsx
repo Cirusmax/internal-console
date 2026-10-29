@@ -11,6 +11,7 @@ import { Atividade } from "./pages/Atividade";
 import { Clientes } from "./pages/Clientes";
 import { Backup } from "./pages/Backup";
 import { generateRecurringTransactions } from "./lib/generateRecurringTransactions";
+import { ReleaseAnnouncement } from "./components/ReleaseAnnouncement";
 
 function AppLayout() {
   const hasGenerated = useRef(false);
@@ -27,6 +28,7 @@ function AppLayout() {
       <main className="content">
         <Outlet />
       </main>
+      <ReleaseAnnouncement />
     </div>
   );
 }

@@ -315,6 +315,33 @@
 .modal h2 { font-size: 1.3rem; margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
 
+/* ===== Novidades da versão ===== */
+.release-announcement {
+  border: 1px solid var(--border);
+  width: calc(100% - 40px);
+  max-width: 520px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  color: var(--text);
+  animation: release-announcement-in 240ms var(--ease);
+}
+.release-announcement::backdrop { background: rgba(16, 24, 44, 0.45); }
+.release-announcement h2 { margin-bottom: 10px; }
+.release-announcement h2:focus { outline: none; }
+.release-announcement__changes { list-style: none; padding: 0; margin: 24px 0; }
+.release-announcement__changes li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.release-announcement__changes li:first-child { padding-top: 0; }
+.release-announcement__changes li:last-child { border-bottom: none; padding-bottom: 0; }
+.release-announcement__changes strong { display: block; font-size: 0.95rem; margin-bottom: 5px; }
+.release-announcement__changes span { color: var(--text-soft); font-size: 0.9rem; line-height: 1.6; }
+@keyframes release-announcement-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .release-announcement { animation: none; }
+}
+
 .type-toggle { display: flex; gap: 10px; margin-bottom: 18px; }
 .type-toggle button {
   flex: 1;
