@@ -157,7 +157,7 @@ export function Clientes() {
         </div>
       )}
 
-      {!loading &&
+      {!loading && !clientsError && !installmentsError &&
         visibleClients.map((client) => {
           const charges = Array.from(chargesByClient.get(client.id)?.values() ?? []);
           const pendingTotal = charges
