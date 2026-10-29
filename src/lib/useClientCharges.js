@@ -113,5 +113,12 @@ export function useClientCharges() {
     await reload();
   };
 
-  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid };
+  const setSubJudice = async (chargeId, subJudice) => {
+    const { error: updateError } = await supabase.from("client_charges")
+      .update({ is_sub_judice: subJudice }).eq("id", chargeId).select("id").single();
+    if (updateError) throw updateError;
+    await reload();
+  };
+
+  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice };
 }

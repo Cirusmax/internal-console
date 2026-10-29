@@ -14,6 +14,7 @@ Painel interno de controle financeiro (receitas, despesas e indicadores), com au
 6. Rode [`supabase/migration_003_clients_installments.sql`](supabase/migration_003_clients_installments.sql) — cria o cadastro de clientes e o controle de parcelamento de contratos.
 7. Rode [`supabase/migration_004_down_payment.sql`](supabase/migration_004_down_payment.sql) — adiciona suporte a "entrada" nas cobranças de cliente.
 8. Por fim, rode [`supabase/migration_005_down_payment_label.sql`](supabase/migration_005_down_payment_label.sql) — ajusta o texto do lançamento gerado ao confirmar uma entrada.
+9. Rode [`supabase/migrations/20261029221711_client_archiving_and_sub_judice.sql`](supabase/migrations/20261029221711_client_archiving_and_sub_judice.sql) antes de publicar a nova versão — adiciona arquivamento de clientes e cobranças sob judice.
 
 ## 2. Configurar o projeto localmente
 
@@ -52,6 +53,10 @@ Toda criação/edição/exclusão de lançamento é registrada automaticamente (
 ## Clientes e parcelamento
 
 Em **Clientes**, cadastre o cliente e depois uma "cobrança" (valor total + nº de parcelas + vencimento da 1ª parcela) — o sistema gera as parcelas mensais sozinho. Elas ficam como "pendente" (ou "vencida", se passar do prazo) e **não contam no saldo/dashboard** até serem confirmadas. Ao clicar "Marcar como pago", a parcela vira um lançamento de receita de verdade (com toda a autoria/auditoria de sempre); "Desfazer" reverte isso.
+
+Na aba **Clientes**, use **Colocar sob judice** na cobrança para identificar as parcelas em aberto como **Sob judice**, em vez de vencidas/pendentes. É possível retirar a marcação depois; pagamentos, vencimentos e o total a receber são preservados. Parcelas já pagas continuam como **Pago**.
+
+**Excluir cobrança** pede confirmação e exclui a cobrança e suas parcelas, preservando receitas já confirmadas no livro-caixa. Para guardar o histórico de clientes quitados, use **Arquivar**. O filtro **Arquivados** permite consultar todo o histórico e **Restaurar** para a lista de ativos. Quite as parcelas antes de arquivar; restaure o cliente antes de registrar novas cobranças ou desfazer pagamentos. O backup inclui os novos campos automaticamente.
 
 ## Relatório em PDF
 
