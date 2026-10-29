@@ -39,5 +39,13 @@ export function useClients() {
     await reload();
   };
 
-  return { clients, loading, error, reload, addClient, deleteClient };
+  const setClientArchived = async (id, archived) => {
+    const { error: updateError } = await supabase.from("clients")
+      .update({ archived_at: archived ? new Date().toISOString() : null })
+      .eq("id", id).select("id").single();
+    if (updateError) throw updateError;
+    await reload();
+  };
+
+  return { clients, loading, error, reload, addClient, deleteClient, setClientArchived };
 }
