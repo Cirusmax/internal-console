@@ -27,8 +27,8 @@ export function useClientCharges() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const reload = useCallback(async () => {
-    setLoading(true);
+  const reload = useCallback(async ({ background = false } = {}) => {
+    if (!background) setLoading(true);
     const { data, error: fetchError } = await supabase
       .from("client_installments")
       .select("*, charge:client_charges(*, client:clients(*))")
@@ -36,12 +36,13 @@ export function useClientCharges() {
       .order("installment_number", { ascending: true });
 
     if (fetchError) {
+      if (background) throw fetchError;
       setError(fetchError.message);
     } else {
       setError(null);
       setInstallments(data ?? []);
     }
-    setLoading(false);
+    if (!background) setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -88,13 +89,13 @@ export function useClientCharges() {
     const { error: installmentsError } = await supabase.from("client_installments").insert(rows);
     if (installmentsError) throw installmentsError;
 
-    await reload();
+    await reload({ background: true });
   };
 
   const deleteCharge = async (chargeId) => {
     const { error: deleteError } = await supabase.from("client_charges").delete().eq("id", chargeId);
     if (deleteError) throw deleteError;
-    await reload();
+    await reload({ background: true });
   };
 
   const markPaid = async (installmentId) => {
@@ -102,7 +103,7 @@ export function useClientCharges() {
       installment_id: installmentId,
     });
     if (rpcError) throw rpcError;
-    await reload();
+    await reload({ background: true });
   };
 
   const unmarkPaid = async (installmentId) => {
@@ -110,14 +111,14 @@ export function useClientCharges() {
       installment_id: installmentId,
     });
     if (rpcError) throw rpcError;
-    await reload();
+    await reload({ background: true });
   };
 
   const setSubJudice = async (chargeId, subJudice) => {
     const { error: updateError } = await supabase.from("client_charges")
       .update({ is_sub_judice: subJudice }).eq("id", chargeId).select("id").single();
     if (updateError) throw updateError;
-    await reload();
+    await reload({ background: true });
   };
 
   return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice };

@@ -5,8 +5,8 @@ export function ClientActionModal({ title, message, label, danger, busy, error, 
 
   useEffect(() => {
     const previouslyFocused = document.activeElement;
-    dialog.current?.querySelector("button")?.focus();
-    return () => previouslyFocused?.focus();
+    dialog.current?.querySelector("button")?.focus({ preventScroll: true });
+    return () => previouslyFocused?.focus({ preventScroll: true });
   }, []);
 
   const handleKeyDown = (event) => {

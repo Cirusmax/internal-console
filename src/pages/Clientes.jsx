@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useClients } from "../lib/useClients";
 import { useClientCharges } from "../lib/useClientCharges";
 import { ClientModal } from "../components/ClientModal";
@@ -28,6 +28,7 @@ export function Clientes() {
   const [view, setView] = useState("active");
   const [actionError, setActionError] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
+  const clientElements = useRef(new Map());
   const activeClients = clients.filter((client) => !client.archived_at);
   const archivedClients = clients.filter((client) => client.archived_at);
   const visibleClients = view === "archived" ? archivedClients : activeClients;
@@ -114,7 +115,20 @@ export function Clientes() {
       message: client.archived_at
         ? `Restaurar "${client.name}" para a lista de clientes ativos?`
         : `Arquivar "${client.name}"? O histórico de cobranças e pagamentos ficará disponível em Arquivados. Você poderá restaurar o cliente quando precisar.`,
-      onConfirm: () => runAction(client.id, () => setClientArchived(client.id, !client.archived_at)),
+      onConfirm: () => runAction(client.id, () => setClientArchived(client.id, !client.archived_at, {
+        beforeUpdate: async () => {
+          setConfirmation(null);
+          const element = clientElements.current.get(client.id);
+          if (!element?.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          element.style.overflow = "hidden";
+          const animation = element.animate([
+            { height: `${element.getBoundingClientRect().height}px`, opacity: 1, transform: "translateX(0)", marginBottom: "16px" },
+            { height: "0px", opacity: 0, transform: "translateX(12px)", marginBottom: "0px" },
+          ], { duration: 280, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" });
+          // A navigation can cancel the animation; the confirmed write is still valid.
+          await animation.finished.catch(() => {});
+        },
+      })),
     });
   };
 
@@ -166,7 +180,8 @@ export function Clientes() {
             .reduce((sum, i) => sum + Number(i.amount), 0);
 
           return (
-            <details className="client-group" key={client.id} open={charges.length > 0}>
+            <details className="client-group" key={client.id} open={charges.length > 0}
+              ref={(element) => { if (element) clientElements.current.set(client.id, element); else clientElements.current.delete(client.id); }}>
               <summary>
                 <span>{client.name}</span>
                 <span className="client-group__actions">
@@ -208,7 +223,7 @@ export function Clientes() {
                           <div className="charge-card__meta">
                             {currencyFormatter.format(charge.total_amount)} · {charge.category}
                           </div>
-                          {charge.is_sub_judice && <span className="badge badge--sub-judice">Sob judice</span>}
+                          {charge.is_sub_judice && <span className="badge badge--sub-judice installment-status">Sob judice</span>}
                         </div>
                         <div className="charge-card__actions">
                         {!client.archived_at && <button
@@ -255,13 +270,13 @@ export function Clientes() {
                                 <td className="amount--receita">{currencyFormatter.format(inst.amount)}</td>
                                 <td>
                                   {inst.paid ? (
-                                    <span className="badge badge--receita">Pago</span>
+                                    <span key="paid" className="badge badge--receita installment-status">Pago</span>
                                   ) : charge.is_sub_judice ? (
-                                    <span className="badge badge--sub-judice">Sob judice</span>
+                                    <span key="sub-judice" className="badge badge--sub-judice installment-status">Sob judice</span>
                                   ) : overdue ? (
-                                    <span className="badge badge--despesa">Vencida</span>
+                                    <span key="overdue" className="badge badge--despesa installment-status">Vencida</span>
                                   ) : (
-                                    <span className="badge badge--recorrente">Pendente</span>
+                                    <span key="pending" className="badge badge--recorrente installment-status">Pendente</span>
                                   )}
                                 </td>
                                 <td>
