@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { contractBillingKey, contractBillingRows } from "./contractBilling";
 
 function buildInstallments({ amount_to_split, installments_count, first_due_date }) {
   const cents = Math.round(Number(amount_to_split) * 100);
@@ -129,5 +130,19 @@ export function useClientCharges() {
       ? { ...inst, charge: { ...inst.charge, description: data.description } } : inst));
   };
 
-  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice, updateChargeDescription };
+  const ensureContractCharge = async (client, form) => {
+    const rows = contractBillingRows(form);
+    if (!rows.length) return null;
+    const key = await contractBillingKey(client.id, form.description, rows);
+    const { data, error: createError } = await supabase.rpc("create_contract_charge", {
+      p_client_id: client.id, p_contract_key: key, p_description: form.description.trim(),
+      p_total_amount: Number(form.amount), p_installments: rows,
+    });
+    if (createError) throw createError;
+    try { await reload({ background: true }); }
+    catch { throw new Error("A cobrança foi registrada, mas não foi possível atualizar a lista. Tente gerar novamente; as parcelas não serão duplicadas."); }
+    return data;
+  };
+
+  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice, updateChargeDescription, ensureContractCharge };
 }

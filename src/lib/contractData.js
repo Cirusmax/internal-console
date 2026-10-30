@@ -44,7 +44,8 @@ export function buildContractVariables(client, form) {
     else if (form.paymentMode === "installments") {
       const entry = Number(form.entry) || 0;
       if (entry < 0 || entry >= amount) throw new Error("A entrada deve ser menor que o valor total.");
-      const schedule = contractSchedule(amount, entry, Number(form.count), form.firstDueDate);
+      const schedule = form.existingSchedule ?? contractSchedule(amount, entry, Number(form.count), form.firstDueDate);
+      if (form.existingSchedule && Math.round((schedule.reduce((sum, item) => sum + item.amount, 0) + entry) * 100) !== Math.round(amount * 100)) throw new Error("Confira as parcelas da cobrança selecionada antes de gerar o contrato.");
       fees += entry > 0 ? `, com entrada de ${money.format(entry)} em ${shortDate(requireDate(form.entryDate))}` : "";
       fees += `, sendo o ${entry > 0 ? "saldo restante" : "valor total"} dividido em ${schedule.length} parcela(s), conforme o seguinte cronograma:\n`;
       fees += schedule.map((item, i) => `Parcela ${i + 1}: ${money.format(item.amount)}, com vencimento em ${shortDate(item.date)}.`).join("\n");
