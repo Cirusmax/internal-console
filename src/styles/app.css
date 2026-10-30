@@ -387,6 +387,7 @@
   color: var(--navy);
 }
 
+.client-overdue { color: var(--red); font-weight: 700; }
 .contract-history { margin-bottom: 18px; border: 1px solid var(--border); border-radius: var(--radius-md, 10px); }
 .contract-history > summary { cursor: pointer; padding: 12px 16px; color: var(--ink); font-size: 0.9rem; }
 .contract-history__items { padding: 0 16px 14px; }

@@ -10,10 +10,11 @@ import { formatCpf } from "../lib/clientProfile";
 import { EditIcon } from "../components/EditIcon";
 import { ContractHistory } from "../components/ContractHistory";
 import { useClientContracts } from "../lib/useClientContracts";
+import { currentContractDate } from "../lib/contractData";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-const todayStr = () => new Date().toISOString().slice(0, 10);
+const isOverdue = (installment, today) => !installment.paid && !installment.charge?.is_sub_judice && installment.due_date < today;
 
 export function Clientes() {
   const { contracts, error: contractsError, reload: reloadContracts, recordContract } = useClientContracts();
@@ -43,7 +44,17 @@ export function Clientes() {
   const clientElements = useRef(new Map());
   const activeClients = clients.filter((client) => !client.archived_at);
   const archivedClients = clients.filter((client) => client.archived_at);
-  const visibleClients = view === "archived" ? archivedClients : activeClients;
+  const today = currentContractDate();
+  const overdueByClient = useMemo(() => {
+    const counts = new Map();
+    for (const installment of installments) {
+      const clientId = installment.charge?.client?.id;
+      if (clientId && isOverdue(installment, today)) counts.set(clientId, (counts.get(clientId) ?? 0) + 1);
+    }
+    return counts;
+  }, [installments, today]);
+  const overdueClients = activeClients.filter((client) => overdueByClient.has(client.id));
+  const visibleClients = view === "archived" ? archivedClients : view === "overdue" ? overdueClients : activeClients;
   const loading = clientsLoading || installmentsLoading;
 
   const runAction = async (id, action) => {
@@ -173,19 +184,23 @@ export function Clientes() {
           <button className={`btn btn--sm ${view === "archived" ? "btn--primary" : "btn--ghost"}`} aria-pressed={view === "archived"} onClick={() => setView("archived")}>
             Arquivados ({archivedClients.length})
           </button>
+          <button className={`btn btn--sm ${view === "overdue" ? "btn--primary" : "btn--ghost"}`} aria-pressed={view === "overdue"} onClick={() => setView("overdue")}>
+            Com parcelas vencidas ({overdueClients.length})
+          </button>
         </div>
       </div>
 
       {loading && <div className="empty-state">Carregando clientes e cobranças...</div>}
       {!loading && !clientsError && !installmentsError && visibleClients.length === 0 && (
         <div className="empty-state">
-          {view === "archived" ? "Nenhum cliente arquivado ainda." : "Nenhum cliente ativo. Clique em \"+ Nova cobrança\" pra cadastrar ou restaure um cliente em Arquivados."}
+          {view === "archived" ? "Nenhum cliente arquivado ainda." : view === "overdue" ? "Nenhum cliente ativo com parcelas vencidas." : "Nenhum cliente ativo. Clique em \"+ Nova cobrança\" pra cadastrar ou restaure um cliente em Arquivados."}
         </div>
       )}
 
       {!loading && !clientsError && !installmentsError &&
         visibleClients.map((client) => {
           const charges = Array.from(chargesByClient.get(client.id)?.values() ?? []);
+          const overdueCount = overdueByClient.get(client.id) ?? 0;
           const pendingTotal = charges
             .flatMap((c) => c.installments)
             .filter((i) => !i.paid)
@@ -200,6 +215,7 @@ export function Clientes() {
                   <span className="client-group__meta">
                     {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
                     {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
+                    {overdueCount > 0 && <span className="client-overdue"> · {overdueCount} {overdueCount === 1 ? "parcela vencida" : "parcelas vencidas"}</span>}
                     {contracts.some((contract) => contract.client_id === client.id) && " · contrato gerado"}
                   </span>
                   <button className="icon-btn" aria-label="Editar cadastro" title="Editar cadastro" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setEditingClient(client); setClientModalOpen(true); }}><EditIcon /></button>
@@ -287,7 +303,7 @@ export function Clientes() {
                         </thead>
                         <tbody>
                           {chargeInstallments.map((inst) => {
-                            const overdue = !inst.paid && inst.due_date < todayStr();
+                            const overdue = isOverdue(inst, today);
                             return (
                               <tr key={inst.id}>
                                 <td>{inst.is_down_payment ? "Entrada" : `${inst.installment_number}/${charge.installments_count}`}</td>
