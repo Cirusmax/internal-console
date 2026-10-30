@@ -192,7 +192,7 @@ export function Clientes() {
             .reduce((sum, i) => sum + Number(i.amount), 0);
 
           return (
-            <details className="client-group" key={client.id} open={charges.length > 0}
+            <details className="client-group" key={client.id}
               ref={(element) => { if (element) clientElements.current.set(client.id, element); else clientElements.current.delete(client.id); }}>
               <summary>
                 <span>{client.name}</span>
