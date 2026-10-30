@@ -30,7 +30,14 @@ export function useClients() {
   const addClient = async (payload) => {
     const { data, error: insertError } = await supabase.from("clients").insert(payload).select().single();
     if (insertError) throw insertError;
-    await reload({ background: true });
+    setClients((current) => [...current, data].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")));
+    return data;
+  };
+
+  const updateClient = async (id, payload) => {
+    const { data, error: updateError } = await supabase.from("clients").update(payload).eq("id", id).select().single();
+    if (updateError) throw updateError;
+    setClients((current) => current.map((client) => client.id === id ? data : client).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")));
     return data;
   };
 
@@ -51,5 +58,5 @@ export function useClients() {
       ? { ...client, archived_at: data.archived_at } : client));
   };
 
-  return { clients, loading, error, reload, addClient, deleteClient, setClientArchived };
+  return { clients, loading, error, reload, addClient, updateClient, deleteClient, setClientArchived };
 }

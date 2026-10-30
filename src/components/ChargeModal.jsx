@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { CATEGORIES } from "../lib/categories";
+import { ClientFields } from "./ClientFields";
+import { FormDialog } from "./FormDialog";
+import { clientFormValues, parseClientProfile } from "../lib/clientProfile";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
+export function ChargeModal({ clients, defaultClientId, onSave, onClose, onCreateClient }) {
   const [clientMode, setClientMode] = useState(clients.length > 0 ? "existing" : "new");
   const [clientId, setClientId] = useState(defaultClientId ?? clients[0]?.id ?? "");
-  const [newClientName, setNewClientName] = useState("");
+  const [newClient, setNewClient] = useState(clientFormValues);
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(CATEGORIES.receita[0]);
   const [totalAmount, setTotalAmount] = useState("");
@@ -23,10 +26,6 @@ export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
 
     if (clientMode === "existing" && !clientId) {
       setError("Selecione um cliente.");
-      return;
-    }
-    if (clientMode === "new" && !newClientName.trim()) {
-      setError("Informe o nome do novo cliente.");
       return;
     }
 
@@ -52,9 +51,15 @@ export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
 
     setSaving(true);
     try {
+      let selectedClientId = clientId;
+      if (clientMode === "new") {
+        const created = await onCreateClient(parseClientProfile(newClient));
+        selectedClientId = created.id;
+        setClientId(created.id);
+        setClientMode("existing");
+      }
       await onSave({
-        client_id: clientMode === "existing" ? clientId : null,
-        new_client_name: clientMode === "new" ? newClientName.trim() : null,
+        client_id: selectedClientId,
         description: description.trim() || "Contrato",
         category,
         total_amount: amount,
@@ -72,13 +77,12 @@ export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
-        <h2>Nova cobrança</h2>
+    <FormDialog title="Nova cobrança" busy={saving} onClose={onClose}>
 
         {error && <div className="form-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          <fieldset className="form-fields" disabled={saving}>
           <div className="form-field">
             <label>Cliente</label>
             {clients.length > 0 && (
@@ -109,12 +113,7 @@ export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
                 ))}
               </select>
             ) : (
-              <input
-                type="text"
-                placeholder="Nome do cliente"
-                value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-              />
+              <ClientFields value={newClient} onChange={setNewClient} prefix="charge-client" />
             )}
           </div>
 
@@ -209,8 +208,8 @@ export function ChargeModal({ clients, defaultClientId, onSave, onClose }) {
               {saving ? "Salvando..." : "Salvar"}
             </button>
           </div>
+          </fieldset>
         </form>
-      </div>
-    </div>
+    </FormDialog>
   );
 }
