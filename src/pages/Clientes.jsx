@@ -96,6 +96,11 @@ export function Clientes() {
 
   const handleMarkPaid = (id) => runAction(id, () => markPaid(id));
 
+  const handleReceipt = (id) => runAction(id, async () => {
+    const { downloadPaymentReceipt } = await import("../lib/generatePaymentReceiptPdf");
+    await downloadPaymentReceipt(id);
+  });
+
   const handleUnmarkPaid = async (id) => {
     setActionError(null);
     setConfirmation({
@@ -280,6 +285,14 @@ export function Clientes() {
                                   )}
                                 </td>
                                 <td>
+                                  <div className="client-installment-actions">
+                                  {inst.paid && <button
+                                    className="btn btn--ghost btn--sm"
+                                    onClick={() => handleReceipt(inst.id)}
+                                    disabled={busyId !== null}
+                                  >
+                                    {busyId === inst.id ? "Aguarde..." : "Baixar recibo"}
+                                  </button>}
                                   {client.archived_at ? null : inst.paid ? (
                                     <button
                                       className="btn btn--ghost btn--sm"
@@ -297,6 +310,7 @@ export function Clientes() {
                                       Marcar como pago
                                     </button>
                                   )}
+                                  </div>
                                 </td>
                               </tr>
                             );

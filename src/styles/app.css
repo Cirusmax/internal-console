@@ -268,6 +268,7 @@
   flex-wrap: wrap;
 }
 .charge-card__actions { justify-content: flex-end; gap: 8px; }
+.client-installment-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .charge-card__header > div:first-child { min-width: 0; overflow-wrap: anywhere; }
 .badge--sub-judice { background: var(--periwinkle-light); color: var(--navy); }
 .charge-card__header .badge--sub-judice { margin-top: 8px; }
