@@ -322,6 +322,11 @@
 .client-profile { margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; color: var(--text-soft); font-size: 0.88rem; overflow-wrap: anywhere; }
 .client-profile strong { display: block; color: var(--ink); margin-bottom: 3px; }
 .contract-note { font-size: 0.85rem; margin: 12px 0 18px; }
+.cep-input { display: flex; gap: 8px; align-items: center; }
+.cep-input input { min-width: 0; }
+.cep-feedback { font-size: 0.82rem; margin: 8px 0 0; }
+.cep-feedback--error { color: var(--red); }
+.icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 @media (max-width: 600px) { .client-profile { grid-template-columns: 1fr; } }
 
 /* ===== Novidades da versão ===== */

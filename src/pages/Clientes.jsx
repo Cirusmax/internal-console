@@ -7,6 +7,7 @@ import { ClientActionModal } from "../components/ClientActionModal";
 import { EditServiceModal } from "../components/EditServiceModal";
 import { ContractModal } from "../components/ContractModal";
 import { formatCpf } from "../lib/clientProfile";
+import { EditIcon } from "../components/EditIcon";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -24,6 +25,7 @@ export function Clientes() {
     unmarkPaid,
     setSubJudice,
     updateChargeDescription,
+    ensureContractCharge,
   } = useClientCharges();
 
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -195,7 +197,7 @@ export function Clientes() {
                     {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
                     {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
                   </span>
-                  <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setEditingClient(client); setClientModalOpen(true); }}>Editar cadastro</button>
+                  <button className="icon-btn" aria-label="Editar cadastro" title="Editar cadastro" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setEditingClient(client); setClientModalOpen(true); }}><EditIcon /></button>
                   <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setContractClient(client); }}>Gerar contrato</button>
                   <button
                     className="btn btn--ghost btn--sm"
@@ -242,7 +244,7 @@ export function Clientes() {
                           {charge.is_sub_judice && <span className="badge badge--sub-judice installment-status">Sob judice</span>}
                         </div>
                         <div className="charge-card__actions">
-                        <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={() => setEditingService(charge)}>Editar serviço</button>
+                        <button className="icon-btn" aria-label="Editar serviço" title="Editar serviço" disabled={busyId !== null} onClick={() => setEditingService(charge)}><EditIcon /></button>
                         {!client.archived_at && <button
                           className="btn btn--ghost btn--sm"
                           aria-pressed={Boolean(charge.is_sub_judice)}
@@ -344,6 +346,7 @@ export function Clientes() {
       )}
       {editingService && <EditServiceModal charge={editingService} onSave={updateChargeDescription} onClose={() => setEditingService(null)} />}
       {contractClient && <ContractModal client={clients.find((client) => client.id === contractClient.id) ?? contractClient}
+        onEnsureCharge={ensureContractCharge}
         charges={Array.from(chargesByClient.get(contractClient.id)?.values() ?? [])} onClose={() => setContractClient(null)}
         onEditClient={() => { setEditingClient(clients.find((client) => client.id === contractClient.id) ?? contractClient); setContractClient(null); setClientModalOpen(true); }} />}
       {confirmation && <ClientActionModal {...confirmation} error={actionError} busy={busyId !== null} onClose={() => { setConfirmation(null); setActionError(null); }} />}
