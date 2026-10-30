@@ -4,13 +4,16 @@ import { useClientCharges } from "../lib/useClientCharges";
 import { ClientModal } from "../components/ClientModal";
 import { ChargeModal } from "../components/ChargeModal";
 import { ClientActionModal } from "../components/ClientActionModal";
+import { EditServiceModal } from "../components/EditServiceModal";
+import { ContractModal } from "../components/ContractModal";
+import { formatCpf } from "../lib/clientProfile";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export function Clientes() {
-  const { clients, loading: clientsLoading, error: clientsError, addClient, deleteClient, setClientArchived } = useClients();
+  const { clients, loading: clientsLoading, error: clientsError, addClient, updateClient, deleteClient, setClientArchived } = useClients();
   const {
     installments,
     loading: installmentsLoading,
@@ -20,10 +23,14 @@ export function Clientes() {
     markPaid,
     unmarkPaid,
     setSubJudice,
+    updateChargeDescription,
   } = useClientCharges();
 
   const [clientModalOpen, setClientModalOpen] = useState(false);
   const [chargeModalOpen, setChargeModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
+  const [editingService, setEditingService] = useState(null);
+  const [contractClient, setContractClient] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [view, setView] = useState("active");
   const [actionError, setActionError] = useState(null);
@@ -61,17 +68,11 @@ export function Clientes() {
   }, [installments]);
 
   const handleSaveClient = async (payload) => {
-    await addClient(payload);
+    return editingClient ? updateClient(editingClient.id, payload) : addClient(payload);
   };
 
   const handleSaveCharge = async (payload) => {
-    const { new_client_name, ...rest } = payload;
-    let clientId = rest.client_id;
-    if (new_client_name) {
-      const created = await addClient({ name: new_client_name, notes: "" });
-      clientId = created.id;
-    }
-    await addCharge({ ...rest, client_id: clientId });
+    await addCharge(payload);
   };
 
   const handleDeleteCharge = async (chargeId) => {
@@ -145,7 +146,7 @@ export function Clientes() {
           <p>Contratos parcelados e valores que ainda vão cair.</p>
         </div>
         <div className="client-page-actions">
-          <button className="btn btn--ghost" onClick={() => setClientModalOpen(true)}>
+          <button className="btn btn--ghost" onClick={() => { setEditingClient(null); setClientModalOpen(true); }}>
             + Novo cliente
           </button>
           <button className="btn btn--primary" onClick={() => setChargeModalOpen(true)}>
@@ -194,6 +195,8 @@ export function Clientes() {
                     {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
                     {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
                   </span>
+                  <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setEditingClient(client); setClientModalOpen(true); }}>Editar cadastro</button>
+                  <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setContractClient(client); }}>Gerar contrato</button>
                   <button
                     className="btn btn--ghost btn--sm"
                     onClick={(event) => handleArchive(event, client)}
@@ -217,6 +220,14 @@ export function Clientes() {
                 </span>
               </summary>
               <div className="client-group__body">
+                {(client.cpf || client.address || client.nationality || client.marital_status || client.profession || client.email || client.phone) && <div className="client-profile">
+                  {client.cpf && <div><strong>CPF</strong>{formatCpf(client.cpf)}</div>}
+                  {client.nationality && <div><strong>Nacionalidade</strong>{client.nationality}</div>}
+                  {client.marital_status && <div><strong>Estado civil</strong>{client.marital_status}</div>}
+                  {client.profession && <div><strong>Profissão</strong>{client.profession}</div>}
+                  {client.address && <div><strong>Endereço</strong>{client.address}</div>}
+                  {(client.email || client.phone) && <div><strong>Contato</strong>{[client.email, client.phone].filter(Boolean).join(" · ")}</div>}
+                </div>}
                 {charges.length === 0 ? (
                   <p style={{ margin: 0 }}>Nenhuma cobrança cadastrada pra esse cliente ainda.</p>
                 ) : (
@@ -231,6 +242,7 @@ export function Clientes() {
                           {charge.is_sub_judice && <span className="badge badge--sub-judice installment-status">Sob judice</span>}
                         </div>
                         <div className="charge-card__actions">
+                        <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={() => setEditingService(charge)}>Editar serviço</button>
                         {!client.archived_at && <button
                           className="btn btn--ghost btn--sm"
                           aria-pressed={Boolean(charge.is_sub_judice)}
@@ -325,11 +337,15 @@ export function Clientes() {
           );
         })}
 
-      {clientModalOpen && <ClientModal onSave={handleSaveClient} onClose={() => setClientModalOpen(false)} />}
+      {clientModalOpen && <ClientModal client={editingClient} onSave={handleSaveClient} onClose={() => setClientModalOpen(false)} onGenerateContract={setContractClient} />}
 
       {chargeModalOpen && (
-        <ChargeModal clients={activeClients} onSave={handleSaveCharge} onClose={() => setChargeModalOpen(false)} />
+        <ChargeModal clients={activeClients} onCreateClient={addClient} onSave={handleSaveCharge} onClose={() => setChargeModalOpen(false)} />
       )}
+      {editingService && <EditServiceModal charge={editingService} onSave={updateChargeDescription} onClose={() => setEditingService(null)} />}
+      {contractClient && <ContractModal client={clients.find((client) => client.id === contractClient.id) ?? contractClient}
+        charges={Array.from(chargesByClient.get(contractClient.id)?.values() ?? [])} onClose={() => setContractClient(null)}
+        onEditClient={() => { setEditingClient(clients.find((client) => client.id === contractClient.id) ?? contractClient); setContractClient(null); setClientModalOpen(true); }} />}
       {confirmation && <ClientActionModal {...confirmation} error={actionError} busy={busyId !== null} onClose={() => { setConfirmation(null); setActionError(null); }} />}
     </>
   );

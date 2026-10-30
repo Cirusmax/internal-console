@@ -121,5 +121,13 @@ export function useClientCharges() {
     await reload({ background: true });
   };
 
-  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice };
+  const updateChargeDescription = async (chargeId, description) => {
+    const { data, error: updateError } = await supabase.from("client_charges")
+      .update({ description: description.trim() }).eq("id", chargeId).select("id, description").single();
+    if (updateError) throw updateError;
+    setInstallments((current) => current.map((inst) => inst.charge_id === chargeId
+      ? { ...inst, charge: { ...inst.charge, description: data.description } } : inst));
+  };
+
+  return { installments, loading, error, reload, addCharge, deleteCharge, markPaid, unmarkPaid, setSubJudice, updateChargeDescription };
 }

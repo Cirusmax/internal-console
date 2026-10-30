@@ -15,6 +15,7 @@ Painel interno de controle financeiro (receitas, despesas e indicadores), com au
 7. Rode [`supabase/migration_004_down_payment.sql`](supabase/migration_004_down_payment.sql) — adiciona suporte a "entrada" nas cobranças de cliente.
 8. Por fim, rode [`supabase/migration_005_down_payment_label.sql`](supabase/migration_005_down_payment_label.sql) — ajusta o texto do lançamento gerado ao confirmar uma entrada.
 9. Rode [`supabase/migrations/20261029221711_client_archiving_and_sub_judice.sql`](supabase/migrations/20261029221711_client_archiving_and_sub_judice.sql) antes de publicar a nova versão — adiciona arquivamento de clientes e cobranças sob judice.
+10. Rode [`supabase/migrations/20261030195559_client_profile_details.sql`](supabase/migrations/20261030195559_client_profile_details.sql) — acrescenta CPF, nacionalidade, estado civil, profissão, endereço e contatos, preservando cadastros existentes.
 
 ## 2. Configurar o projeto localmente
 
@@ -57,6 +58,16 @@ Em **Clientes**, cadastre o cliente e depois uma "cobrança" (valor total + nº 
 Na aba **Clientes**, use **Colocar sob judice** na cobrança para identificar as parcelas em aberto como **Sob judice**, em vez de vencidas/pendentes. É possível retirar a marcação depois; pagamentos, vencimentos e o total a receber são preservados. Parcelas já pagas continuam como **Pago**.
 
 **Excluir cobrança** pede confirmação e exclui a cobrança e suas parcelas, preservando receitas já confirmadas no livro-caixa. Para guardar o histórico de clientes quitados, use **Arquivar**. O filtro **Arquivados** permite consultar todo o histórico e **Restaurar** para a lista de ativos. Quite as parcelas antes de arquivar; restaure o cliente antes de registrar novas cobranças ou desfazer pagamentos. O backup inclui os novos campos automaticamente.
+
+## Cadastro e contratos
+
+**Novo cliente** e o cadastro dentro de **Nova cobrança** solicitam nome completo, CPF válido, nacionalidade, estado civil e endereço. Profissão e contatos são opcionais. **Editar cadastro** permite completar os clientes antigos. Os novos campos são incluídos automaticamente nos backups.
+
+**Editar serviço** altera somente a descrição da cobrança; valores, parcelas e receitas existentes são preservados.
+
+**Gerar contrato** e **Salvar e gerar contrato** usam o modelo do escritório, com as nove cláusulas gerais e Giovanni Antonio de Almeida Junior como contratado, conforme os dados fornecidos. Escolha cível ou trabalhista, serviço, honorários fixos e/ou de êxito, pagamento à vista ou parcelado, entrada e vencimentos. Uma cobrança existente pode preencher os valores. A opção de valor já pago afeta apenas a redação do documento; gerar o contrato não cria cobranças nem confirma pagamentos.
+
+No trabalhista, os honorários de êxito expressamente pactuados incluem FGTS, seguro-desemprego e demais verbas da demanda na base de cálculo. Essa disposição é omitida no cível. O modelo web foi sanitizado para remover o cliente e o caso de exemplo; as cláusulas gerais permanecem. Word mantém o arquivo original como base, sem fontes binárias redundantes, e PDF usa geometria Letter e tipografia equivalente para impressão, com paginação automática. Os documentos são gerados no navegador e não ocupam o Supabase Storage.
 
 ## Recibos em PDF
 
