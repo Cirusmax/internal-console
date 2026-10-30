@@ -58,6 +58,10 @@ Na aba **Clientes**, use **Colocar sob judice** na cobrança para identificar as
 
 **Excluir cobrança** pede confirmação e exclui a cobrança e suas parcelas, preservando receitas já confirmadas no livro-caixa. Para guardar o histórico de clientes quitados, use **Arquivar**. O filtro **Arquivados** permite consultar todo o histórico e **Restaurar** para a lista de ativos. Quite as parcelas antes de arquivar; restaure o cliente antes de registrar novas cobranças ou desfazer pagamentos. O backup inclui os novos campos automaticamente.
 
+## Recibos em PDF
+
+Em **Clientes**, cada parcela paga (inclusive entrada e clientes arquivados) oferece **Baixar recibo**. O PDF inclui logomarca, fonte Questrial, nome do cliente, valor recebido, data efetiva do lançamento, contrato, parcela, usuário emissor e referência ao pagamento. A emissão consulta novamente o pagamento e só permite baixar quando a receita vinculada continua confirmada e corresponde ao valor da parcela. O arquivo pode ser encaminhado ao cliente pelo canal desejado. Gerar um recibo não altera os dados financeiros.
+
 ## Relatório em PDF
 
 No **Dashboard**, em "Relatório de movimentações": escolha um intervalo de datas (ou marque "Todo o período" pra pegar tudo que já existe) e clique "Exportar PDF". Gera um relatório com a tabela de todas as entradas e saídas do período, totais de receita/despesa/saldo, e uma conclusão em texto (saldo do período, maior categoria de despesa etc.) calculada a partir dos próprios dados.
