@@ -8,12 +8,15 @@ import { EditServiceModal } from "../components/EditServiceModal";
 import { ContractModal } from "../components/ContractModal";
 import { formatCpf } from "../lib/clientProfile";
 import { EditIcon } from "../components/EditIcon";
+import { ContractHistory } from "../components/ContractHistory";
+import { useClientContracts } from "../lib/useClientContracts";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export function Clientes() {
+  const { contracts, error: contractsError, reload: reloadContracts, recordContract } = useClientContracts();
   const { clients, loading: clientsLoading, error: clientsError, addClient, updateClient, deleteClient, setClientArchived } = useClients();
   const {
     installments,
@@ -158,6 +161,7 @@ export function Clientes() {
       </div>
 
       {clientsError && <div className="form-error">Erro ao carregar clientes: {clientsError}</div>}
+      {contractsError && <div role="alert" className="form-error">{contractsError} <button className="btn btn--ghost btn--sm" onClick={reloadContracts}>Tentar novamente</button></div>}
       {installmentsError && <div className="form-error">Erro ao carregar parcelas: {installmentsError}</div>}
       {actionError && !confirmation && <div className="form-error" role="alert">{actionError}</div>}
 
@@ -196,6 +200,7 @@ export function Clientes() {
                   <span className="client-group__meta">
                     {charges.length} {charges.length === 1 ? "cobrança" : "cobranças"}
                     {pendingTotal > 0 && ` · ${currencyFormatter.format(pendingTotal)} a receber`}
+                    {contracts.some((contract) => contract.client_id === client.id) && " · contrato gerado"}
                   </span>
                   <button className="icon-btn" aria-label="Editar cadastro" title="Editar cadastro" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setEditingClient(client); setClientModalOpen(true); }}><EditIcon /></button>
                   <button className="btn btn--ghost btn--sm" disabled={busyId !== null} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setContractClient(client); }}>Gerar contrato</button>
@@ -230,6 +235,7 @@ export function Clientes() {
                   {client.address && <div><strong>Endereço</strong>{client.address}</div>}
                   {(client.email || client.phone) && <div><strong>Contato</strong>{[client.email, client.phone].filter(Boolean).join(" · ")}</div>}
                 </div>}
+                <ContractHistory contracts={contracts.filter((contract) => contract.client_id === client.id)} />
                 {charges.length === 0 ? (
                   <p style={{ margin: 0 }}>Nenhuma cobrança cadastrada pra esse cliente ainda.</p>
                 ) : (
@@ -347,6 +353,7 @@ export function Clientes() {
       {editingService && <EditServiceModal charge={editingService} onSave={updateChargeDescription} onClose={() => setEditingService(null)} />}
       {contractClient && <ContractModal client={clients.find((client) => client.id === contractClient.id) ?? contractClient}
         onEnsureCharge={ensureContractCharge}
+        onRecordContract={recordContract}
         charges={Array.from(chargesByClient.get(contractClient.id)?.values() ?? [])} onClose={() => setContractClient(null)}
         onEditClient={() => { setEditingClient(clients.find((client) => client.id === contractClient.id) ?? contractClient); setContractClient(null); setClientModalOpen(true); }} />}
       {confirmation && <ClientActionModal {...confirmation} error={actionError} busy={busyId !== null} onClose={() => { setConfirmation(null); setActionError(null); }} />}

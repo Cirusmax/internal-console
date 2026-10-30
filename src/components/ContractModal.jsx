@@ -3,7 +3,7 @@ import { FormDialog } from "./FormDialog";
 import { currentContractDate } from "../lib/contractData";
 import { parseClientProfile } from "../lib/clientProfile";
 
-export function ContractModal({ client, charges, onClose, onEditClient, onEnsureCharge }) {
+export function ContractModal({ client, charges, onClose, onEditClient, onEnsureCharge, onRecordContract }) {
   const [form, setForm] = useState({ kind: "", description: "", feeMode: "fixed", amount: "", successPercent: "", paymentMode: "signature", paymentStatus: "pending", count: 1, firstDueDate: currentContractDate(), entry: "", entryDate: currentContractDate(), city: "São João del-Rei/MG", date: currentContractDate() });
   const [busy, setBusy] = useState(false); const [error, setError] = useState(null);
   const [sourceChargeId, setSourceChargeId] = useState("");
@@ -30,6 +30,8 @@ export function ContractModal({ client, charges, onClose, onEditClient, onEnsure
         if (form.paymentMode === "signature") setForm({ ...form, paymentMode: "date", firstDueDate: form.date });
         setNotice("Cobrança e parcelas registradas no cadastro do cliente. Novos downloads reutilizam a mesma cobrança.");
       } else if (!sourceChargeId) setNotice("Contrato gerado sem criar parcelas.");
+      await onRecordContract(client, form);
+      setNotice("Contrato gerado. O resumo dos termos foi registrado no cadastro do cliente.");
       save();
     }
     catch (err) { setError(err.message ?? "Não foi possível gerar o contrato."); }
