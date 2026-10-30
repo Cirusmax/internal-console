@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 import { supabase } from "./supabaseClient";
 import logoUrl from "../assets/logo.png";
 import fontUrl from "../assets/fonts/Questrial-Regular.ttf?url";
+import { getReceiptIssuerName } from "./receiptIssuers";
 
 const INK = [28, 43, 65];
 const SOFT = [91, 100, 114];
@@ -44,9 +45,10 @@ export async function createPaymentReceiptPdf({ installment, user, issuedAt = ne
   if (!Number.isFinite(amount) || amount <= 0 || Math.round(amount * 100) !== Math.round(Number(installment.amount) * 100)) {
     throw new Error("O valor do lançamento não corresponde à parcela. Confira o pagamento antes de emitir o recibo.");
   }
-  if (!client?.name?.trim() || !charge.description?.trim() || !user?.email) {
+  if (!client?.name?.trim() || !charge.description?.trim()) {
     throw new Error("Não foi possível identificar o cliente, a cobrança ou o usuário emissor.");
   }
+  const issuerName = getReceiptIssuerName(user);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(payment.occurred_on ?? "")) {
     throw new Error("A data do pagamento não está disponível. Confira o lançamento.");
   }
@@ -56,7 +58,7 @@ export async function createPaymentReceiptPdf({ installment, user, issuedAt = ne
   doc.addFileToVFS("Questrial-Regular.ttf", font.split(",")[1]);
   doc.addFont("Questrial-Regular.ttf", "Questrial", "normal");
   doc.setFont("Questrial", "normal");
-  doc.setProperties({ title: `Recibo de pagamento - ${client.name}`, author: user.email,
+  doc.setProperties({ title: `Recibo de pagamento - ${client.name}`, author: issuerName,
     subject: charge.description, creator: "Almeida Advocacia | Internal Console" });
 
   const reference = `REC-${payment.id.toUpperCase()}`;
@@ -116,7 +118,7 @@ export async function createPaymentReceiptPdf({ installment, user, issuedAt = ne
     doc.setDrawColor(226, 226, 224); doc.line(22, 245, 188, 245);
     text("USUÁRIO EMISSOR", 22, 253, 8, ACCENT);
     doc.setFontSize(9);
-    text(doc.splitTextToSize(user.email, 166), 22, 260, 9);
+    text(issuerName, 22, 260, 9);
     text(`Emitido em ${timestamp.format(issuedAt)} (Brasília)`, 22, 277, 8, SOFT);
     text(reference, 22, 284, 7.5, SOFT);
     doc.setFontSize(8); doc.text(`${page} / ${pages}`, 188, 291, { align: "right" });
