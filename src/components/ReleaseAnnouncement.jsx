@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
 // Keep this ID stable across deployments of the same announcement.
-const RELEASE_ID = "2026-10-clientes";
+const RELEASE_ID = "2026-10-30-contracts";
 const SEEN_FIELD = "internal_console_seen_release";
 
 function ReleaseDialog({ onClose }) {
@@ -22,10 +22,11 @@ function ReleaseDialog({ onClose }) {
       <h2 id="release-title" tabIndex={-1} autoFocus>O sistema foi atualizado</h2>
       <p id="release-description">Veja o que mudou na aba Clientes.</p>
       <ul className="release-announcement__changes">
-        <li><strong>Cobranças sob judice</strong><span>Identifique cobranças em discussão judicial e retire a marcação quando precisar.</span></li>
-        <li><strong>Clientes arquivados</strong><span>Arquive clientes quitados, consulte o histórico em Arquivados e restaure quando quiser.</span></li>
-        <li><strong>Exclusão de cobranças</strong><span>Exclua com confirmação, preservando as receitas já recebidas.</span></li>
-        <li><strong>Navegação mais suave</strong><span>Arquive e altere pagamentos ou o status sob judice sem voltar ao topo da página.</span></li>
+        <li><strong>Cadastro completo e CEP automático</strong><span>Preencha o CEP para buscar o endereço e informe o número. Use o lápis para editar o cadastro ou o nome do serviço.</span><small>Clientes → Novo cliente ou ícone de lápis</small></li>
+        <li><strong>Contratos em PDF e Word</strong><span>Escolha o serviço, os honorários e a forma de pagamento. O modelo segue o visual do recibo e distingue contratos cíveis e trabalhistas.</span><small>Clientes → Gerar contrato</small></li>
+        <li><strong>Parcelas geradas pelo contrato</strong><span>Valores fixos a pagar criam a cobrança e as parcelas automaticamente. Se já estiver integralmente pago ou for somente de êxito, não são criadas parcelas.</span><small>Gerar contrato → Situação do valor fixo e Pagamento</small></li>
+        <li><strong>Histórico dos termos contratados</strong><span>Consulte serviço, valor, entrada, vencimentos e percentual de êxito. Somente o resumo fica salvo, sem guardar PDF ou Word. Repetir o download dos mesmos termos não duplica o registro.</span><small>Clientes → Abra o cliente → Contratos gerados</small></li>
+        <li><strong>Recibos de pagamento</strong><span>Baixe o comprovante em PDF com cliente, valor, logomarca e nome do usuário emissor.</span><small>Clientes → Parcela paga → Baixar recibo</small></li>
       </ul>
       <button className="btn btn--primary btn--block" onClick={onClose}>Entendi, continuar</button>
     </dialog>
